@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-1
+  labels:
+    app: app-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-1
+  template:
+    metadata:
+      labels:
+        app: app-1
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        command: ["/bin/sh", "-c"]
+        args: ["while true; do echo $(date) >> /out/log; sleep 5; done"]
+        volumeMounts:
+        - name: volume-1
+          mountPath: /out
+      - name: multitool
+        image: praqma/network-multitool
+        command: ["/bin/sh", "-c"]
+        args: ["tail -f /in/log"]
+        volumeMounts:
+        - name: volume-1
+          mountPath: /in
+      volumes:
+      - name: volume-1
+        persistentVolumeClaim:
+          claimName: nfs-pvc
